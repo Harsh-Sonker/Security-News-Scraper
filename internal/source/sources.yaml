@@ -1,18 +1,72 @@
-# sources.yaml
+- name: cisa
+  title: CISA Advisories
+  url: https://www.cisa.gov/cybersecurity-advisories/all.xml
+  type: rss
+  weight: 1.0
+  tags: [advisory, gov]
+  enabled: true
+
+- name: projectzero
+  title: Google Project Zero
+  url: https://googleprojectzero.blogspot.com/feeds/posts/default
+  type: atom
+  weight: 1.0
+  tags: [research]
+  enabled: true
+
+- name: talos
+  title: Cisco Talos
+  url: https://blog.talosintelligence.com/rss/
+  type: rss
+  weight: 1.0
+  tags: [research]
+  enabled: true
+
+- name: paloalto-unit42
+  title: Unit 42
+  url: https://unit42.paloaltonetworks.com/feed/
+  type: rss
+  weight: 1.0
+  tags: [research]
+  enabled: true
+
+- name: crowdstrike
+  title: CrowdStrike
+  url: https://www.crowdstrike.com/blog/feed/
+  type: rss
+  weight: 1.0
+  tags: [research]
+  enabled: true
+
+- name: rapid7
+  title: Rapid7 Blog
+  url: https://www.rapid7.com/blog/rss/
+  type: rss
+  weight: 1.0
+  tags: [research]
+  enabled: true
+
+- name: sans-isc
+  title: SANS Internet Storm Center
+  url: https://isc.sans.edu/rssfeed_full.xml
+  type: rss
+  weight: 1.0
+  tags: [research]
+  enabled: true
 
 - name: krebs
   title: Krebs on Security
   url: https://krebsonsecurity.com/feed/
   type: rss
-  weight: 1.0
+  weight: 0.95
   tags: [news]
   enabled: true
 
-- name: thehackernews
-  title: The Hacker News
-  url: https://feeds.feedburner.com/TheHackersNews
+- name: recordedfuture
+  title: The Record
+  url: https://therecord.media/feed
   type: rss
-  weight: 0.8
+  weight: 0.95
   tags: [news]
   enabled: true
 
@@ -20,7 +74,7 @@
   title: BleepingComputer
   url: https://www.bleepingcomputer.com/feed/
   type: rss
-  weight: 0.9
+  weight: 0.90
   tags: [news]
   enabled: true
 
@@ -28,7 +82,7 @@
   title: SecurityWeek
   url: https://www.securityweek.com/feed/
   type: rss
-  weight: 0.8
+  weight: 0.90
   tags: [news]
   enabled: true
 
@@ -36,22 +90,206 @@
   title: Dark Reading
   url: https://www.darkreading.com/rss.xml
   type: rss
-  weight: 0.8
+  weight: 0.85
+  tags: [news]
+  enabled: true
+
+- name: thehackernews
+  title: The Hacker News
+  url: https://feeds.feedburner.com/TheHackersNews
+  type: rss
+  weight: 0.80
+  tags: [news]
+  enabled: true
+
+- name: hackread
+  title: HackRead
+  url: https://hackread.com/feed/
+  type: rss
+  weight: 0.75
   tags: [news]
   enabled: true
 
 - name: theregister
-  title: The Register (Security)
+  title: The Register Security
   url: https://www.theregister.com/security/headlines.atom
-  type: rss
-  weight: 0.8
+  type: atom
+  weight: 0.80
   tags: [news]
   enabled: true
 
-- name: cisa
-  title: CISA Advisories
-  url: https://www.cisa.gov/cybersecurity-advisories/all.xml
+- name: csoonline
+  title: CSO Online
+  url: https://www.csoonline.com/feed/
+  type: rss
+  weight: 0.80
+  tags: [news]
+  enabled: true
+
+- name: cybersecuritynews
+  title: Cyber Security News
+  url: https://cybersecuritynews.com/feed/
+  type: rss
+  weight: 0.80
+  tags: [news]
+  enabled: true
+
+- name: securityaffairs
+  title: Security Affairs
+  url: https://securityaffairs.com/feed
+  type: rss
+  weight: 0.80
+  tags: [news]
+  enabled: true
+
+- name: infosecuritymagazine
+  title: Infosecurity Magazine
+  url: https://www.infosecurity-magazine.com/rss/news/
+  type: rss
+  weight: 0.80
+  tags: [news]
+  enabled: true
+
+- name: cisa-news
+  title: CISA News
+  url: https://www.cisa.gov/news.xml
+  type: rss
+  weight: 0.80
+  tags: [news, gov]
+  enabled: true
+
+- name: ncsc-uk
+  title: UK NCSC News
+  url: https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml
+  type: rss
+  weight: 0.90
+  tags: [advisory, gov]
+  enabled: true
+
+- name: ncsc-nl
+  title: Netherlands NCSC Advisories
+  url: https://advisories.ncsc.nl/rss/advisories
+  type: rss
+  weight: 0.90
+  tags: [advisory, gov]
+  enabled: true
+
+- name: cyber-gov-au
+  title: Australian Cyber Security Centre
+  url: https://www.cyber.gov.au/rss/news
+  type: rss
+  weight: 0.90
+  tags: [advisory, gov]
+  enabled: false
+
+- name: google-security
+  title: Google Security Blog
+  url: https://feeds.feedburner.com/GoogleOnlineSecurityBlog
+  type: rss
+  weight: 0.90
+  tags: [research]
+  enabled: true
+
+- name: schneier
+  title: Schneier on Security
+  url: https://www.schneier.com/feed/atom/
+  type: atom
+  weight: 0.90
+  tags: [research]
+  enabled: true
+
+- name: troyhunt
+  title: Troy Hunt
+  url: https://www.troyhunt.com/rss/
+  type: rss
+  weight: 0.80
+  tags: [research]
+  enabled: true
+
+- name: microsoft-security
+  title: Microsoft Security Blog
+  url: https://www.microsoft.com/security/blog/feed/
+  type: rss
+  weight: 0.90
+  tags: [research]
+  enabled: true
+
+- name: securelist
+  title: Kaspersky Securelist
+  url: https://securelist.com/feed/
+  type: rss
+  weight: 0.80
+  tags: [research]
+  enabled: true
+
+- name: sophos
+  title: Sophos Threat Research
+  url: https://news.sophos.com/en-us/category/threat-research/feed/
+  type: rss
+  weight: 0.80
+  tags: [research]
+  enabled: true
+
+- name: sentinelone
+  title: SentinelOne Labs
+  url: https://www.sentinelone.com/labs/feed/
+  type: rss
+  weight: 0.90
+  tags: [research]
+  enabled: true
+
+- name: okta
+  title: Okta Security
+  url: https://sec.okta.com/rss.xml
+  type: rss
+  weight: 0.80
+  tags: [research]
+  enabled: true
+
+- name: exploitdb
+  title: Exploit Database
+  url: https://www.exploit-db.com/rss.xml
   type: rss
   weight: 1.0
-  tags: [advisory, gov]
+  tags: [exploit]
+  enabled: true
+
+- name: packetstorm
+  title: Packet Storm
+  url: https://packetstormsecurity.com/files/feed/
+  type: rss
+  weight: 0.80
+  tags: [exploit]
+  enabled: false
+
+- name: fulldisclosure
+  title: Full Disclosure
+  url: https://seclists.org/rss/fulldisclosure.rss
+  type: rss
+  weight: 0.80
+  tags: [advisory]
+  enabled: true
+
+- name: malwarebytes
+  title: Malwarebytes Labs
+  url: https://www.malwarebytes.com/blog/feed
+  type: rss
+  weight: 0.80
+  tags: [research]
+  enabled: true
+
+- name: eset
+  title: WeLiveSecurity
+  url: https://feeds.feedburner.com/eset/blog
+  type: rss
+  weight: 0.80
+  tags: [research]
+  enabled: true
+
+- name: proofpoint
+  title: Proofpoint
+  url: https://www.proofpoint.com/us/rss.xml
+  type: rss
+  weight: 0.80
+  tags: [research]
   enabled: true

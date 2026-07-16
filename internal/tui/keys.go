@@ -12,6 +12,7 @@ type keyMap struct {
 	Open    key.Binding
 	Browser key.Binding
 	Ideate  key.Binding
+	Sort    key.Binding
 	Back    key.Binding
 	Quit    key.Binding
 }
@@ -45,6 +46,10 @@ func defaultKeyMap() keyMap {
 		Ideate: key.NewBinding(
 			key.WithKeys("i"),
 			key.WithHelp("i", "ideate"),
+		),
+		Sort: key.NewBinding(
+			key.WithKeys("s"),
+			key.WithHelp("s", "sort"),
 		),
 		Back: key.NewBinding(
 			key.WithKeys("esc", "backspace"),

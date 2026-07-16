@@ -3,6 +3,7 @@
 package tui
 
 import (
+	"sort"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -22,6 +23,15 @@ const (
 	stateList
 	stateDetail
 	stateError
+)
+
+type SortMode int
+
+const (
+	SortScore SortMode = iota
+	SortTime
+	SortOutlets
+	SortCVE
 )
 
 const (
@@ -79,6 +89,8 @@ type Model struct {
 
 	cursor int
 	err    error
+	
+	sortMode SortMode
 
 	opener    func(string) error
 	status    string
@@ -137,6 +149,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.notes = msg.data.Notes
 		}
 		m.state = stateList
+		m.sortItems()
 		return m, nil
 	case errMsg:
 		m.state = stateError
@@ -259,6 +272,21 @@ func (m Model) handleListKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.viewport.SetContent(m.renderDetailBody())
 			m.viewport.GotoTop()
 		}
+	case key.Matches(msg, m.keys.Sort):
+		m.sortMode = (m.sortMode + 1) % 4
+		m.sortItems()
+		m.cursor = 0
+		switch m.sortMode {
+		case SortScore:
+			m.status = "Sorted by: SCORE"
+		case SortTime:
+			m.status = "Sorted by: TIME"
+		case SortOutlets:
+			m.status = "Sorted by: OUTLETS"
+		case SortCVE:
+			m.status = "Sorted by: CVE SEVERITY"
+		}
+		m.statusErr = false
 	}
 	return m, nil
 }
@@ -304,6 +332,48 @@ func (m Model) selected() rank.Scored {
 		return rank.Scored{}
 	}
 	return m.scored[m.cursor]
+}
+
+func (m *Model) sortItems() {
+	if len(m.scored) == 0 {
+		return
+	}
+	sort.SliceStable(m.scored, func(i, j int) bool {
+		a, b := m.scored[i], m.scored[j]
+		switch m.sortMode {
+		case SortTime:
+			return a.Cluster.LastSeen > b.Cluster.LastSeen
+		case SortOutlets:
+			oa := outletCount(a.Cluster)
+			ob := outletCount(b.Cluster)
+			if oa != ob {
+				return oa > ob
+			}
+			return a.Score > b.Score
+		case SortCVE:
+			c1 := clusterMaxCVSS(a.Cluster)
+			c2 := clusterMaxCVSS(b.Cluster)
+			if c1 != nil && c2 != nil && *c1 != *c2 {
+				return *c1 > *c2
+			} else if c1 != nil && c2 == nil {
+				return true
+			} else if c2 != nil && c1 == nil {
+				return false
+			}
+			la, lb := len(a.Cluster.CVEs), len(b.Cluster.CVEs)
+			if la != lb {
+				return la > lb
+			}
+			return a.Score > b.Score
+		case SortScore:
+			fallthrough
+		default:
+			if a.Score != b.Score {
+				return a.Score > b.Score
+			}
+			return a.Cluster.LastSeen > b.Cluster.LastSeen
+		}
+	})
 }
 
 func Run(loader Loader, ideator Ideator) error {

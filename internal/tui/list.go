@@ -49,19 +49,36 @@ func (m Model) listChrome() string {
 
 func (m Model) listColHeader() string {
 	t := m.theme.ColHead
+
+	storyCol := "STORY"
+	scoreCol := "SCORE"
+	outCol := "OUT"
+	cveCol := "CVE"
+
+	switch m.sortMode {
+	case SortTime:
+		storyCol = "STORY▼"
+	case SortScore:
+		scoreCol = "SCORE▼"
+	case SortOutlets:
+		outCol = "OUT▼"
+	case SortCVE:
+		cveCol = "CVE▼"
+	}
+
 	left := strings.Join([]string{
 		" ",
 		fmt.Sprintf("%*s", colRankW, "#"),
-		padRight("STORY", m.headlineWidth()),
-		padRight("SCORE", colScoreBarW),
+		padRight(storyCol, m.headlineWidth()),
+		padRight(scoreCol, colScoreBarW),
 		fmt.Sprintf("%*s", colScoreNumW, ""),
-		padRight("OUT", colOutletW),
+		padRight(outCol, colOutletW),
 	}, " ")
-	return m.spread(t.Render(left), t.Render("CVE"))
+	return m.spread(t.Render(left), t.Render(cveCol))
 }
 
 func (m Model) listFooter() string {
-	keys := m.keyHints(m.keys.Up, m.keys.Down, m.keys.Open, m.keys.Browser, m.keys.Quit)
+	keys := m.keyHints(m.keys.Up, m.keys.Down, m.keys.Sort, m.keys.Open, m.keys.Browser, m.keys.Quit)
 	right := m.severityLegend()
 	if s := m.statusText(); s != "" {
 		right = s

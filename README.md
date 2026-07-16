@@ -29,7 +29,8 @@ Everything works **without requiring API keys**.
 
 ## Features
 
-- ⚡ **Blazing-Fast Ingestion**
+- ⚡ **Blazing-Fast Ingestion (36+ Built-in Sources)**
+  - Out-of-the-box support for CISA, Project Zero, Talos, Unit 42, CrowdStrike, and more
   - Concurrent RSS/Atom feed scraping
   - Per-host rate limiting
   - HTTP caching with `304 Not Modified`
@@ -44,8 +45,9 @@ Everything works **without requiring API keys**.
   - Jaccard similarity matching
   - Automatic duplicate detection
 
-- 🎨 **Interactive Terminal Dashboard**
-  - Bubble Tea powered TUI
+- 🎨 **Premium Terminal Dashboard**
+  - Custom boxed layout with clean borders, header pills, and persistent status bar
+  - **Dynamic Sorting** (`s` key): Instantly reorganize feed by Score, Time, Outlets, or CVE Severity
   - Color-coded severity
   - Story drill-down
   - Open articles directly in the browser
@@ -110,6 +112,14 @@ go run ./cmd/security-news-scraper scrape
 ```bash
 go run ./cmd/security-news-scraper tui
 ```
+
+#### TUI Keyboard Shortcuts
+- `↑ / k` : Move cursor up
+- `↓ / j` : Move cursor down
+- `s` : Cycle dynamic sorting mode (Score -> Time -> Outlets -> CVE)
+- `Enter` : View full story details
+- `o` : Open original article in default web browser
+- `q` : Quit dashboard
 
 ---
 
