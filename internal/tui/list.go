@@ -39,10 +39,10 @@ func (m Model) listView() string {
 }
 
 func (m Model) listChrome() string {
-	right := m.theme.Meta.Render(fmt.Sprintf("%d stories", len(m.scored)))
+	right := m.theme.HeaderPill.Render(fmt.Sprintf(" %d stories ", len(m.scored)))
 	return lipgloss.JoinVertical(lipgloss.Left,
 		m.spread(m.wordmark(), right),
-		m.theme.rule(m.width),
+		"",
 		m.listColHeader(),
 	)
 }
@@ -66,10 +66,8 @@ func (m Model) listFooter() string {
 	if s := m.statusText(); s != "" {
 		right = s
 	}
-	return lipgloss.JoinVertical(lipgloss.Left,
-		m.theme.rule(m.width),
-		m.spread(keys, right),
-	)
+	content := m.spread(" "+keys, right+" ")
+	return m.theme.StatusBar.Width(m.width).Render(content)
 }
 
 func (m Model) listBody(capacity int) string {
@@ -102,9 +100,11 @@ func (m Model) renderRow(i int, s rank.Scored, selected bool) string {
 
 	barStyle := t.Dim
 	barGlyph := " "
+	rowStyle := t.RowBg
 	switch {
 	case selected:
 		barGlyph, barStyle = glyphSelected, t.SelBar
+		rowStyle = t.RowBgSel
 	case kev || b == bandCritical:
 		barGlyph, barStyle = glyphHot, t.bandFG(bandCritical)
 	case b != bandNone:
@@ -126,7 +126,8 @@ func (m Model) renderRow(i int, s rank.Scored, selected bool) string {
 		t.Meta.Render(fmt.Sprintf("%*s", colScoreNumW, fmt.Sprintf("%.2f", s.Score))),
 		m.renderOutlets(c),
 	}, " ")
-	return m.spread(left, m.renderCVEChip(c, b, kev))
+	rowContent := m.spread(left, m.renderCVEChip(c, b, kev))
+	return rowStyle.Width(m.width).Render(rowContent)
 }
 
 func windowRange(cursor, capacity, total int) (int, int) {

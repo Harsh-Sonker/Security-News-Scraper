@@ -274,8 +274,10 @@ func (m Model) handleDetailKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) applySize(w, h int) {
-	m.width = w
-	m.height = h
+	m.width = w - 4
+	if m.width < 1 { m.width = 1 }
+	m.height = h - 2
+	if m.height < 1 { m.height = 1 }
 	m.viewport.Width = m.bodyWidth()
 	m.viewport.Height = m.detailBodyHeight()
 	if m.state == stateDetail {

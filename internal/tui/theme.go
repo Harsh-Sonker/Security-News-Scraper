@@ -64,6 +64,11 @@ type Theme struct {
 	PanelTitle  lipgloss.Style
 	Label       lipgloss.Style
 	Link        lipgloss.Style
+	AppBorder   lipgloss.Style
+	HeaderPill  lipgloss.Style
+	RowBg       lipgloss.Style
+	RowBgSel    lipgloss.Style
+	StatusBar   lipgloss.Style
 }
 
 func NewTheme() Theme {
@@ -87,6 +92,11 @@ func NewTheme() Theme {
 		PanelTitle:  lipgloss.NewStyle().Foreground(lipgloss.Color(colorViolet)).Bold(true),
 		Label:       lipgloss.NewStyle().Foreground(lipgloss.Color(colorBlue)).Bold(true),
 		Link:        lipgloss.NewStyle().Foreground(lipgloss.Color(colorCyan)).Underline(true),
+		AppBorder:   lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color(colorDim)).Padding(0, 1),
+		HeaderPill:  lipgloss.NewStyle().Background(lipgloss.Color(colorViolet)).Foreground(lipgloss.Color(colorVoid)).Bold(true).Padding(0, 1),
+		RowBg:       lipgloss.NewStyle(),
+		RowBgSel:    lipgloss.NewStyle().Background(lipgloss.Color(colorDim)),
+		StatusBar:   lipgloss.NewStyle().Background(lipgloss.Color(colorViolet)).Foreground(lipgloss.Color(colorVoid)).Bold(true).Padding(0, 1),
 	}
 }
 

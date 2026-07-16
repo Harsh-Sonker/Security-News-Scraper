@@ -30,16 +30,18 @@ func (m Model) View() string {
 	if m.width < minRenderWidth || m.height < minRenderHeight {
 		return m.tooSmallView()
 	}
+	var view string
 	switch m.state {
 	case stateLoading:
-		return m.loadingView()
+		view = m.loadingView()
 	case stateError:
-		return m.errorView()
+		view = m.errorView()
 	case stateDetail:
-		return m.detailView()
+		view = m.detailView()
 	default:
-		return m.listView()
+		view = m.listView()
 	}
+	return m.theme.AppBorder.Render(view)
 }
 
 func (m Model) tooSmallView() string {
@@ -56,7 +58,7 @@ func (m Model) tooSmallView() string {
 
 func (m Model) wordmark() string {
 	t := m.theme
-	return t.BrandMark.Render(markOpen) + t.Brand.Render(brandName) + t.BrandMark.Render(markClose) +
+	return t.HeaderPill.Render(markOpen+brandName+markClose) +
 		" " + t.fg(colorCyan).Render(markMid) + " " + t.fg(colorViolet).Render(tagline) + " " + t.fg(colorCyan).Render(markMid)
 }
 
@@ -129,19 +131,21 @@ func (m Model) errString() string {
 
 func (m Model) detailView() string {
 	t := m.theme
-	scroll := fmt.Sprintf("%3.0f%%", m.viewport.ScrollPercent()*100)
-	left := t.PanelTitle.Render(markOpen+"DOSSIER"+markClose) + " " +
+	scroll := fmt.Sprintf(" %3.0f%% ", m.viewport.ScrollPercent()*100)
+	left := t.HeaderPill.Render(markOpen+"DOSSIER"+markClose) + " " +
 		t.Muted.Render(fmt.Sprintf("story %d of %d", m.cursor+1, len(m.scored)))
-	head := m.spread(left, t.Meta.Render(scroll))
-	foot := m.spread(
-		m.keyHints(m.keys.Back, m.keys.Browser, m.keys.Ideate, m.keys.Down, m.keys.Up, m.keys.Quit),
-		m.statusText(),
-	)
+	head := m.spread(left, t.HeaderPill.Render(scroll))
+	
+	footKeys := m.keyHints(m.keys.Back, m.keys.Browser, m.keys.Ideate, m.keys.Down, m.keys.Up, m.keys.Quit)
+	footStatus := m.statusText()
+	footContent := m.spread(" "+footKeys, footStatus+" ")
+	foot := t.StatusBar.Width(m.width).Render(footContent)
+	
 	return lipgloss.JoinVertical(lipgloss.Left,
 		head,
-		t.rule(m.width),
+		"",
 		m.viewport.View(),
-		t.rule(m.width),
+		"",
 		foot,
 	)
 }
