@@ -1,0 +1,86 @@
+How to Build a Cyber Threat Intelligence Engine in Go (Step-by-Step Tutorial)
+
+--------------------------------------------------
+
+Introduction
+If you want to build a highly concurrent, backend-heavy application in Go, building a Threat Intelligence Engine is the perfect project. In this tutorial, I will walk you through exactly how I built the Security News Scraper step-by-step, explaining the architecture and the code so you can build your own.
+
+This engine fetches data from 36 security sources concurrently, deduplicates the stories using mathematical algorithms, enriches them with public vulnerability databases, and displays them in a Terminal User Interface (TUI).
+
+--------------------------------------------------
+
+Project Architecture & Directory Structure
+We follow the standard Go project layout. Here is how the code is organized:
+
+- /cmd/security-news-scraper/ : Contains the main.go file (the entry point of the app).
+- /internal/source/ : Code to manage and parse our 36 RSS/Atom feed URLs.
+- /internal/fetcher/ : The highly concurrent HTTP engine that downloads the feeds.
+- /internal/cluster/ : The Union-Find algorithm that groups duplicate stories together.
+- /internal/enrich/ : Code that queries public CVE and EPSS databases.
+- /internal/rank/ : The mathematical scoring engine.
+- /internal/tui/ : The Bubble Tea code for our Terminal Dashboard.
+
+--------------------------------------------------
+
+Step 1: Setting up the Local Database (SQLite)
+Instead of requiring a heavy PostgreSQL server, we use an embedded SQLite database using the pure-Go "modernc.org/sqlite" driver (which means no messy CGO dependencies).
+
+The database stores articles, clusters, and CVE data. We initialize this in our main package. By keeping it local, the application remains fully self-contained and blazing fast.
+
+--------------------------------------------------
+
+Step 2: The Ingestion Engine (Concurrency in Go)
+The first real challenge is fetching 36 RSS feeds (like CISA, Google Project Zero, and Hacker News). Doing this one-by-one would take way too long. 
+
+To solve this, we look at /internal/fetcher/fetcher.go. 
+We use Go's "goroutines" (lightweight threads) and a "WaitGroup". We loop through our 36 sources and launch a goroutine for each one. The WaitGroup tells the main program to pause until all 36 downloads are complete.
+
+To prevent wasting bandwidth, we implement HTTP caching. When we request a feed, we send the "Last-Modified" timestamp. If the server replies with a "304 Not Modified" HTTP status, we instantly skip parsing because no new news has been published.
+
+--------------------------------------------------
+
+Step 3: Stopping the Noise (Deduplication)
+Once we have 100 articles, we need to group duplicates (e.g., 5 articles about the same Log4J hack). This happens in /internal/cluster/cluster.go.
+
+1. Jaccard Similarity: We clean up the article headlines (removing clickbait words) and compare their words. The Jaccard algorithm calculates the percentage of overlapping words.
+2. Union-Find (Disjoint-Set): If the similarity is above 35%, we use a Union-Find data structure to merge the two articles into a single "Cluster". 
+Instead of 10 separate database rows, they are grouped under one primary breaking news story.
+
+--------------------------------------------------
+
+Step 4: Keyless Vulnerability Enrichment
+An article might mention "CVE-2024-1234", but we need to know how dangerous that is without paying for API keys. This logic lives in /internal/enrich/.
+
+When the scraper finds a CVE tag, it reaches out to open public databases:
+- CVEList V5: We download the raw JSON for the vulnerability to extract the CVSS Score (0.0 to 10.0).
+- FIRST EPSS: We query their public API to get the statistical probability of the exploit being used in the wild.
+- CISA KEV: We check a locally cached list of Known Exploited Vulnerabilities.
+
+--------------------------------------------------
+
+Step 5: The Scoring Engine
+How do we know what belongs at the top of the dashboard? In /internal/rank/rank.go, we calculate a deterministic score for every story.
+
+The formula takes into account:
+- Recency: Newer stories get a higher baseline score.
+- Velocity: A cluster with 10 articles from different sources gets a massive multiplier (because the whole industry is talking about it).
+- Severity: If the story contains a critical CVE (like a 9.8 CVSS score), the score is multiplied exponentially.
+
+--------------------------------------------------
+
+Step 6: Building the Terminal Dashboard (TUI)
+We don't need a React frontend. In /internal/tui/, we use a library called Bubble Tea to build a Terminal User Interface.
+
+Bubble Tea follows the Elm architecture (Model, Update, View).
+- Model: Stores the current list of news clusters and the currently selected sorting mode.
+- Update: Listens for keyboard presses. For example, if you press the 's' key, the Update function cycles the sorting mode from SCORE, to TIME, to OUTLETS, to CVE SEVERITY, and resorts the array.
+- View: Renders the data into a beautiful, color-coded string. We use another library called "Lipgloss" to draw custom borders, header pills, and a persistent status bar at the bottom.
+
+--------------------------------------------------
+
+Conclusion
+By combining Go's concurrency for fetching, mathematical clustering for deduplication, and a responsive TUI for visualization, you can build an incredibly powerful Threat Intelligence tool. 
+
+The beauty of this architecture is its modularity. You can easily add new sources in the sources.yaml file, or add a new enrichment module to ping VirusTotal, without rewriting the core engine!
+
+To see the full source code and dive into the specific files mentioned above, check out the repository: https://github.com/Harsh-Sonker/security-news-scraper
