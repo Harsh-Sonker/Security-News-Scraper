@@ -1,0 +1,75 @@
+# Building a High-Signal Cyber Threat Intelligence Engine in Go
+
+## The Problem: The Cybersecurity Noise Problem
+Every day, thousands of security articles, vulnerability disclosures, and exploit proofs-of-concept are published. For security analysts and engineers, the problem is rarely a lack of information—it’s an overwhelming surplus of it. 
+
+When a critical vulnerability like Log4Shell or a zero-day (a previously unknown flaw that developers have had "zero days" to fix) drops, 20 different outlets write about it within the hour. Most security dashboards simply aggregate these links, leaving you to manually sift through duplicate stories, look up the CVSS severity, and check if the vulnerability is actually being exploited in the wild.
+
+I built the **Security News Scraper** to solve this exact problem: a blazing-fast, terminal-native engine that doesn't just collect news, but automatically deduplicates, enriches, and ranks it.
+
+---
+
+### Terminology Glossary
+Before diving into the architecture, here are the core terms and acronyms used in this guide:
+- **API (Application Programming Interface)**: A way for two different software programs to communicate and share data.
+- **CISA (Cybersecurity and Infrastructure Security Agency)**: The US government agency responsible for national cybersecurity.
+- **CVE (Common Vulnerabilities and Exposures)**: A standard naming convention (like `CVE-2024-1234`) used to publicly identify and track specific cybersecurity flaws.
+- **CVSS (Common Vulnerability Scoring System)**: A standardized score from 0.0 to 10.0 that measures the technical severity of a CVE.
+- **EPSS (Exploit Prediction Scoring System)**: A statistical model that predicts the probability (from 0 to 100%) that a vulnerability will actually be exploited in the wild.
+- **HTTP (Hypertext Transfer Protocol)**: The foundation of data communication on the internet. A `304 Not Modified` is an HTTP status code indicating that a resource hasn't changed since the client's last visit.
+- **JSON (JavaScript Object Notation)**: A lightweight, easily readable format used to structure and transmit data across the internet.
+- **KEV (Known Exploited Vulnerabilities)**: A catalog maintained by CISA listing vulnerabilities that hackers are actively exploiting.
+- **LLM (Large Language Model)**: AI models like ChatGPT or Qwen that understand and generate human-like text.
+- **RSS/Atom (Really Simple Syndication)**: Standardized web feed formats used to publish frequently updated works, like blog entries or news headlines.
+- **TUI (Terminal User Interface)**: A visual interface constructed entirely within a text-based terminal or command line, rather than a web browser.
+
+---
+
+## 1. Fast, Concurrent Data Ingestion (36+ Sources)
+The first step of the pipeline is gathering the data. The engine reaches out to an expansive network of **36 top-tier security feeds**, covering a wide spectrum of intelligence:
+- **Government Advisories:** CISA, NCSC (National Cyber Security Centres for UK & NL), Australian Cyber Security Centre
+- **Elite Research Teams:** Google Project Zero, Cisco Talos, Palo Alto Unit 42, CrowdStrike, Rapid7
+- **Breaking News Outlets:** BleepingComputer, Dark Reading, The Hacker News, Krebs on Security
+
+Since doing this sequentially is slow, the project leverages Go's world-class concurrency model (`goroutines` and `waitgroups`). The HTTP fetcher spins up parallel routines to grab RSS/Atom feeds simultaneously. 
+- **Smart Bandwidth:** It implements HTTP caching by honoring `304 Not Modified` headers, ensuring we aren't wasting bandwidth or getting rate-limited by upstream sources.
+- **Fail-soft:** If one source goes down, the entire pipeline doesn't crash. It simply logs the error and proceeds with the healthy feeds.
+
+## 2. Union-Find Story Clustering (Deduplication)
+Once the raw XML/HTML is parsed into a standardized format, we face the "echo chamber" effect: one major breach results in 10 identical articles.
+
+To solve this, I implemented an algorithmic clustering layer:
+- **Data Normalization:** Titles are scrubbed of clickbait suffixes and URLs are reduced to canonical hashes.
+- **Jaccard Similarity & Union-Find:** The engine uses a mathematical algorithm called Jaccard Similarity to compare the text overlap of headlines. If two headlines are highly similar, a **Union-Find (Disjoint-Set)** data structure seamlessly merges them into a single "Cluster." 
+- **Result:** Instead of seeing 5 rows for the same zero-day, you see a single "Breaking News" cluster with a badge indicating it was corroborated by 5 different sources.
+
+## 3. Keyless CVE Enrichment
+A headline containing a CVE tag is useless without context. Most tools require you to provide a paid API key to lookup CVE details. 
+
+I designed a **keyless enrichment architecture** that directly queries public domain databases:
+1. **CVEList V5:** Pulls the raw JSON vulnerability data to get the base CVSS score.
+2. **FIRST EPSS:** Queries the Exploit Prediction Scoring System.
+3. **CISA KEV:** Checks the vulnerability against the US Government's Known Exploited Vulnerabilities catalog. If it's on this list, it means threat actors are actively using it *right now*.
+
+## 4. Premium Terminal Dashboard & Dynamic Sorting
+Instead of standing up a heavy PostgreSQL database and a React frontend, I opted for maximum portability and speed:
+- **SQLite Database:** The entire local state is stored in a serverless, self-contained SQLite database using a pure-Go driver (`modernc.org/sqlite`). There are no CGO dependencies, meaning this project cross-compiles to Windows, Mac, or Linux instantly.
+- **Premium Bubble Tea TUI:** I built a rich, color-coded, keyboard-driven dashboard directly in the terminal using the `charmbracelet/bubbletea` framework. It features a custom boxed layout, clean borders, header pills, and a persistent status bar.
+
+**The Dynamic Sorting Engine**
+To give analysts total control over the firehose of data, the TUI includes a dynamic sorting engine. By pressing the `s` key, the entire dashboard instantly reorganizes based on the active mode:
+- **SCORE**: A deterministic algorithmic rank weighing recency, velocity, and CVE severity.
+- **TIME**: A purely chronological feed for breaking news.
+- **OUTLETS**: Sorting by clustering size to see what the entire industry is talking about right now.
+- **CVE SEVERITY**: Surfacing the most critical, highest CVSS-rated vulnerabilities to the very top.
+
+## 5. (Bonus) AI Ideation & Watch Daemon
+- **Local AI (LLMs):** The engine includes interfaces to pass the top stories to local Large Language Models (like Qwen via Ollama) to generate automated executive summaries.
+- **Watch Mode:** It can be run as a background daemon (`watch` command) that wakes up every hour, runs the pipeline, and fires a webhook if and only if a *new* high-signal story breaches the critical threshold.
+
+---
+
+## Conclusion
+Building this engine in Go was an exercise in building lean, fast, and highly-concurrent systems. It takes the firehose of security news and distills it into a quiet, color-coded, mathematically-ranked dossier that helps engineers patch what matters most.
+
+*You can check out the source code on my GitHub: [github.com/Harsh-Sonker/security-news-scraper](https://github.com/Harsh-Sonker/security-news-scraper)*
