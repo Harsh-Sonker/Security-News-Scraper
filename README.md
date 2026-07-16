@@ -1,5 +1,20 @@
 # Security News Scraper
 
+```text
+███████╗ ██████╗██████╗  █████╗ ██████╗ ███████╗██████╗ 
+██╔════╝██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗
+███████╗██║     ██████╔╝███████║██████╔╝█████╗  ██████╔╝
+╚════██║██║     ██╔══██╗██╔══██║██╔═══╝ ██╔══╝  ██╔══██╗
+███████║╚██████╗██║  ██║██║  ██║██║     ███████╗██║  ██║
+╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝
+```
+<p align="center">
+  <img src="https://img.shields.io/badge/Cybersecurity--Projects-Threat%20Intel-red?style=flat-square&logo=github" alt="Project" />
+  <img src="https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat-square&logo=go" alt="Go Version" />
+  <img src="https://img.shields.io/badge/License-AGPL%20v3-purple?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/badge/MITRE%20ATT&CK-Reconnaissance-orange?style=flat-square" alt="MITRE" />
+</p>
+
 > **A blazing-fast, keyless cyber threat intelligence engine built with Go.**
 > Created and maintained by **Harsh Sonker**.
 
