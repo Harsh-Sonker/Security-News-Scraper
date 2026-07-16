@@ -4,7 +4,7 @@
 > Created and maintained by **Harsh Sonker**.
 
 <p align="center">
-  <img src="assets/dashboard.png"
+  <img src="assets/dashboard.png?v=2"
        alt="Security News Scraper Terminal UI"
        width="100%">
 </p>
