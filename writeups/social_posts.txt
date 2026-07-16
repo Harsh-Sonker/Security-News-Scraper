@@ -1,88 +1,88 @@
-# Medium / Reddit Post
+Medium / Reddit Post
 
-*(This post is designed for both Medium and Reddit (e.g., r/golang, r/cybersecurity, r/programming). It follows a beginner-friendly progression from prerequisites to deep technical details.)*
+(This post is designed for both Medium and Reddit. It follows a beginner-friendly progression from prerequisites to deep technical details.)
 
----
+--------------------------------------------------
 
-# I Built a Cyber Threat Intelligence Engine in Go to Solve the "Noise" Problem
+I Built a Cyber Threat Intelligence Engine in Go to Solve the "Noise" Problem
 
 If you've ever tried to follow cybersecurity news, you know the struggle. Every time a major vulnerability drops, 20 different blogs, government agencies, and research teams write an article about it within the same hour. 
 
 For security analysts, the problem is rarely a lack of information—it’s an overwhelming, exhausting surplus of it. You end up manually reading the same story 5 times just to figure out how severe the threat actually is.
 
-To fix this, I built the **Security News Scraper**: a blazing-fast, terminal-native engine written in Go that doesn't just collect news, but automatically deduplicates, enriches, and mathematically ranks it.
+To fix this, I built the Security News Scraper: a blazing-fast, terminal-native engine written in Go that doesn't just collect news, but automatically deduplicates, enriches, and mathematically ranks it.
 
 Before we dive into how I built it, let's cover the basics so anyone—even if you're entirely new to cybersecurity or Go—can follow along!
 
----
+--------------------------------------------------
 
-## 📚 Prerequisites: What You Need to Know
+📚 Prerequisites: What You Need to Know
 
 If you are a beginner, here are the core concepts used in this project. I've included resources if you want to fall down a learning rabbit hole!
 
-### 1. The Language: Go (Golang)
+1. The Language: Go (Golang)
 Go is a programming language developed by Google. It is famous for being incredibly fast, compiling to a single file, and having built-in "concurrency" (the ability to do thousands of things at the exact same time without crashing). 
-🔗 *Resource*: [A Tour of Go](https://go.dev/tour/welcome/1)
+🔗 Resource: A Tour of Go - https://go.dev/tour/welcome/1
 
-### 2. The Data: RSS / Atom Feeds
+2. The Data: RSS / Atom Feeds
 RSS (Really Simple Syndication) is a standard web format used to publish frequently updated works, like news headlines or blog posts. Instead of visiting 30 websites, a program can just read their RSS feeds to get all the new articles in one go.
-🔗 *Resource*: [What is RSS? (Codecademy)](https://www.codecademy.com/article/what-is-rss)
+🔗 Resource: What is RSS? (Codecademy) - https://www.codecademy.com/article/what-is-rss
 
-### 3. The Cybersecurity Jargon (CVE, CVSS, KEV)
+3. The Cybersecurity Jargon (CVE, CVSS, KEV)
 When a hacker finds a flaw in software, the industry uses standard terms to track it:
-- **CVE (Common Vulnerabilities and Exposures)**: A unique ID for a specific flaw (e.g., `CVE-2024-1234`).
-- **CVSS (Common Vulnerability Scoring System)**: A severity score from `0.0` to `10.0`. A `9.8` means the flaw is critical and easy to exploit.
-- **KEV (Known Exploited Vulnerabilities)**: A list maintained by the US Government (CISA) of flaws that hackers are *actively* using right now. 
-🔗 *Resource*: [National Vulnerability Database (NVD)](https://nvd.nist.gov/)
+- CVE (Common Vulnerabilities and Exposures): A unique ID for a specific flaw (e.g., CVE-2024-1234).
+- CVSS (Common Vulnerability Scoring System): A severity score from 0.0 to 10.0. A 9.8 means the flaw is critical and easy to exploit.
+- KEV (Known Exploited Vulnerabilities): A list maintained by the US Government (CISA) of flaws that hackers are actively using right now. 
+🔗 Resource: National Vulnerability Database (NVD) - https://nvd.nist.gov/
 
-### 4. The Interface: TUI (Terminal User Interface)
+4. The Interface: TUI (Terminal User Interface)
 Most apps have a GUI (Graphical User Interface) like a website. A TUI is an app that lives entirely inside your command prompt (Terminal), driven by your keyboard. They are incredibly fast and lightweight.
-🔗 *Resource*: [Bubble Tea (The Go library used for this UI)](https://github.com/charmbracelet/bubbletea)
+🔗 Resource: Bubble Tea (The Go library used for this UI) - https://github.com/charmbracelet/bubbletea
 
----
+--------------------------------------------------
 
-## 🛠️ How the Engine Works (Step-by-Step)
+🛠️ How the Engine Works (Step-by-Step)
 
 Now that we know the basics, here is a detailed breakdown of how the engine actually works under the hood.
 
-### Step 1: Gathering the Data (Massive Concurrency)
-The engine is pre-configured with **36 top-tier security feeds** (including the US Government's CISA, Google Project Zero, and Cisco Talos). 
+Step 1: Gathering the Data (Massive Concurrency)
+The engine is pre-configured with 36 top-tier security feeds (including the US Government's CISA, Google Project Zero, and Cisco Talos). 
 
-Because pulling 36 websites one-by-one is slow, the engine uses Go’s `goroutines`. It spins up 36 parallel tasks that fetch all the data at the exact same time. It also uses smart "HTTP Caching" (checking for `304 Not Modified` responses). This means if a blog hasn't published anything new since the last time you checked, the engine instantly skips it to save bandwidth and speed up the process.
+Because pulling 36 websites one-by-one is slow, the engine uses Go’s "goroutines". It spins up 36 parallel tasks that fetch all the data at the exact same time. It also uses smart "HTTP Caching" (checking for 304 Not Modified responses). This means if a blog hasn't published anything new since the last time you checked, the engine instantly skips it to save bandwidth and speed up the process.
 
-### Step 2: Stopping the Echo Chamber (Deduplication)
+Step 2: Stopping the Echo Chamber (Deduplication)
 Once the data is downloaded, we have 100 new articles. But remember the "noise" problem? 10 of those articles are about the exact same hack.
 
 To fix this, I implemented an algorithmic clustering layer:
-1. **Jaccard Similarity:** This is a mathematical algorithm that looks at two headlines and calculates how much of the text overlaps.
-2. **Union-Find Data Structure:** If the algorithm decides two headlines are talking about the same event, it uses a Union-Find structure to group them together.
-Instead of seeing 10 separate rows on your screen, you see a single "Cluster" that tells you: *“This event happened, and 10 different outlets are talking about it.”*
+1. Jaccard Similarity: This is a mathematical algorithm that looks at two headlines and calculates how much of the text overlaps.
+2. Union-Find Data Structure: If the algorithm decides two headlines are talking about the same event, it uses a Union-Find structure to group them together.
+Instead of seeing 10 separate rows on your screen, you see a single "Cluster" that tells you: “This event happened, and 10 different outlets are talking about it.”
 
-### Step 3: Keyless Enrichment
+Step 3: Keyless Enrichment
 An article title saying "New VPN Flaw Discovered (CVE-2024-0001)" isn't enough info. How dangerous is it? 
 
-Most tools require you to sign up for paid API keys to get this data. I designed a **keyless architecture** that reaches out to open public databases. It scans the article, finds the `CVE-2024-0001` tag, and pulls:
-- The **CVSS Score** (Is it a 9.8 Critical?)
-- The **EPSS Score** (What is the statistical probability it gets exploited in the next 30 days?)
-- The **CISA KEV** status (Are hackers exploiting this today?)
+Most tools require you to sign up for paid API keys to get this data. I designed a keyless architecture that reaches out to open public databases. It scans the article, finds the CVE-2024-0001 tag, and pulls:
+- The CVSS Score (Is it a 9.8 Critical?)
+- The EPSS Score (What is the statistical probability it gets exploited in the next 30 days?)
+- The CISA KEV status (Are hackers exploiting this today?)
 
-### Step 4: The Premium TUI and Dynamic Sorting
+Step 4: The Premium TUI and Dynamic Sorting
 Finally, all this data needs to be presented to the user. Instead of building a heavy web app, I built a rich, color-coded TUI using SQLite (for local database storage) and Bubble Tea.
 
-Because analysts need to view data from different angles, I built a **Dynamic Sorting Engine**. By pressing the `s` key on your keyboard, the dashboard instantly reorganizes the entire feed by:
-- **SCORE**: A mathematical rank weighing how recent the story is, how many outlets are covering it, and the CVSS severity.
-- **TIME**: A purely chronological feed for breaking news.
-- **OUTLETS**: Sorts by the number of sources writing about it, showing you what the entire industry is focused on right now.
-- **CVE SEVERITY**: Brings the most dangerous, highest CVSS-rated vulnerabilities to the absolute top.
+Because analysts need to view data from different angles, I built a Dynamic Sorting Engine. By pressing the 's' key on your keyboard, the dashboard instantly reorganizes the entire feed by:
+- SCORE: A mathematical rank weighing how recent the story is, how many outlets are covering it, and the CVSS severity.
+- TIME: A purely chronological feed for breaking news.
+- OUTLETS: Sorts by the number of sources writing about it, showing you what the entire industry is focused on right now.
+- CVE SEVERITY: Brings the most dangerous, highest CVSS-rated vulnerabilities to the absolute top.
 
----
+--------------------------------------------------
 
-## 🚀 Try It Yourself
+🚀 Try It Yourself
 Building this engine in Go was an incredible exercise in building lean, fast, and highly-concurrent systems. It takes the firehose of security news and distills it into a quiet, mathematically-ranked dossier that helps engineers figure out what to patch first.
 
 The project is fully open-source. You can pull it, compile it, and run the dashboard directly on your machine without needing any API keys.
 
-**Check out the source code here:**
-🔗 [github.com/Harsh-Sonker/security-news-scraper](https://github.com/Harsh-Sonker/security-news-scraper)
+Check out the source code here:
+🔗 https://github.com/Harsh-Sonker/security-news-scraper
 
 Would love to hear your thoughts, feedback, or any features you'd like to see added!
